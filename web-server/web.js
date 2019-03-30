@@ -57,8 +57,8 @@ app.get('/graph',function(req,res) {
 	db.query("SELECT * FROM temperature",function(err,datas) {
 		var ary = template.MakeData(datas);
 		html = html.replace("<%DATA%>",ary[0]);
-		html = html.replace("<%START%>",ary[1]);
-		html = html.replace("<%END%>",ary[2]);
+		html = html.replace("<%START%>",dateFormat(ary[1],"yyyy/mm/dd H:MM:ss"));
+		html = html.replace("<%END%>",dateFormat(ary[2],"yyyy/mm/dd H:MM:ss"));
 		res.send(html);
 	});
 });

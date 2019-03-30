@@ -3,6 +3,7 @@ var app = express();
 var qs = require('querystring');
 var path = require('path');
 var fs = require('fs');
+var dateFormat = require('dateformat');
 
 
 module.exports= {
@@ -16,18 +17,24 @@ module.exports= {
     ${script}
     </head>
     <body>
-
-        <h2><p><b>My temperature</b></p></h2>
+        <h2><p><b>My temperature-강태호</b></p></h2>
         <p>
-        <h4>thingspeak graph<h4>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/725655/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line"></iframe>
+        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/web-server/web.js">Arduino code link</a><br>
+        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/Arduino/temperature/temperature.ino">Nodejs code link</a>
         </p>
-        <h4>sever data
+        <h4>[Google Chart]</h4>
+        <div id="timeCont">
+          <b>Start time:<b><%START%></br>
+          <b>End time:<b><%END%></br>
+        </div>
+        </br>
+        <div id="myChart"></div>
+        <h4>Sever data(last 1 hour)
         <div id="myDiv">
             <table>
                 <thead>
                     <tr>
-		  	<th>#</th>
+		  	                <th>#</th>
                         <th>Time</th>
                         <th>Temperature</th>
                         <th>diff</th>
@@ -65,17 +72,55 @@ module.exports= {
             padding:3px;
         }
 
+        a {
+          font-size: 20px;
+        }
+
+        #timeCont {
+          width:300px;
+          padding:3px;
+          margin-bottom:5px;
+          background-color: rgb(255, 130, 78);
+        }
+
+
     </style>`;
 
   },
   'Script':function() {
     return `<script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
+    google.charts.load('current', {packages:['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
       var socket = io.connect("ec2-18-223-155-255.us-east-2.compute.amazonaws.com");
       socket.on('temp',function(data) {
-	        $('#myTable').html(data);
+	        $('#myTable').html(data.td);
       });
+
+      function drawChart(jsonData) {
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime','Date/Time');
+      data.addColumn('number','degree');
+      data.addRows(
+        <%DATA%>
+      );
+      var options = {
+        title: 'My Room Temperature',
+        subtitle: 'Made by 강태호',
+	      chartArea: {width:'90%', height:'80%', left:'20px', top:'10px'},
+	      legend: 'none',
+        hAxis: {title:'date'},
+        vAxis: {title:'degree'},
+        backgroundColor: {stroke: '#ff99bb', strokeWidth:5},
+        width: 1200,
+        height: 600
+      };
+      var chart = new google.visualization.LineChart(document.getElementById('myChart'));
+      chart.draw(data, options);
+      }
     </script>`;
   },
   'ReadFile':function() {
@@ -117,6 +162,18 @@ module.exports= {
       tag += `</tr>`;
     }
     return tag;
-
-  }
+  },
+  'MakeData':function(datas) {
+      var ary = "[";
+    	var comma = "";
+    	for(i in datas) {
+        var date = dateFormat(datas[i].time,"yyyy/mm/dd/HH/MM/ss");
+        date = date.split("/");
+	date[1] -= 1;
+        ary+=`${comma}[new Date(${date}),${datas[i].degree}]`;
+        comma =",";
+      }
+      ary +="]";
+      return [ary,datas[0].time,datas[datas.length-1].time];
+    }
 }
