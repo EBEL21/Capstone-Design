@@ -19,8 +19,8 @@ module.exports= {
     <body>
         <h2><p><b>My temperature-강태호</b></p></h2>
         <p>
-        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/web-server/web.js">Arduino code link</a><br>
-        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/Arduino/temperature/temperature.ino">Nodejs code link</a>
+        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/web-server/web.js">Nodejs code link</a><br>
+        <a href="https://github.com/EBEL21/Capstone-Design/blob/master/Arduino/temperature/temperature.ino">Arduino code link</a>
         </p>
         <h4>[Google Chart]</h4>
         <div id="timeCont">
